@@ -1,19 +1,21 @@
-const adminAuth=(req,res,next)=>{
-    const token="xyz"
-    const isAuthorized=token==="xyz"
-    if(!isAuthorized){
-        res.status(401).send("Unauthorized")
-    }else{
-        next()
-    }
+const User=require("../models/user")
+const jwt=require("jsonwebtoken")
+const userAuth=async(req,res,next)=>{
+ try{
+    const {token}=req.cookies
+  if(!token){
+    throw new Error("Invalid Token")
+  }
+  const decodeData=await  jwt.verify(token,"DivTinder@1$3")
+  const {_id}=decodeData
+  const user=await User.findById({_id})
+  if(!user){
+    throw new Error("User Doesnot exists")
+  }
+  req.user=user
+  next()
+}catch(err){
+   res.status(404).send("Something went wrong"+err.message)
 }
-const userAuth=(req,res,next)=>{
-    const token="xyzasdf"
-    const isAuthorized=token==="xyz"
-    if(!isAuthorized){
-        res.status(401).send("Unauthorized")
-    }else{
-        next()
-    }
 }
-module.exports={adminAuth,userAuth}
+module.exports={userAuth}
